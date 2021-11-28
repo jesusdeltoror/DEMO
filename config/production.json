@@ -1,0 +1,12 @@
+{
+    "nombre"        :   "Api SEC",
+    "configDB"      :{
+        "HOST": "mongodb://localhost:27017"
+        
+    },
+    "configToken"   :{
+        "SEED"  : "demoSEC",
+        "expiration" : "12h"    
+    }
+
+}

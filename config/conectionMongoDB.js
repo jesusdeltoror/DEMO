@@ -1,6 +1,7 @@
 const {MongoClient} = require('mongodb');
+const config        = require('config');
 
-const url = 'mongodb://localhost:27017';
+const url = config.get('configDB.HOST');
 const client = new MongoClient(url);
 const dbName = 'SEC';
 
