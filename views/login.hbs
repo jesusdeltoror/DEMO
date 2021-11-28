@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="./stylesheets/login.css">
+
+    <div class="container-log">
+        <a class="waves-effect waves-light btn modal-trigger orange darken-3 btn-log" href="#modal1"><i class="fas fa-user-plus"></i></a>
+        <a class="waves-effect waves-light btn modal-trigger orange darken-3 btn-log" href="#modal2"><i class="fas fa-user"></i></a>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal">
+        <div class="login_head orange darken-3 center flow-text"><span>Register</span></div>
+        <div class="login_body center valign-wrapper">
+            <form action="/register" method="post"></form>
+                <input class="center" name="email" type="email" placeholder="email@gmail.com" required>
+                <input class="center" name="password" type="password" placeholder="password" required>
+                <input type="submit" class="btn orange">
+            </form>
+        </div>
+    </div>
+
+
+
+
+<script src="./javascripts/login.js"></script>
