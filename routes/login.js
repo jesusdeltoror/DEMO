@@ -48,11 +48,6 @@ router.post('/register', function(req,res,next){
 
 });
 
-router.post('/login', function(req,res,next){
-  loginUser(req.body.email,req.body.password);
-});
-
-
 
 
 //REGISTER USER
@@ -70,14 +65,5 @@ async function registerUser(email,nombre,password) {
   return "EL usuario ya existe"
 }
 
-//LOGIN USER
-async function loginUser(email,password){
-  await client.connect();
-  console.log('Conexion exitosa a SEC registro');
-  const db = client.db(dbName);
-  const collection = db.collection('Users');
-
-  return
-}
 
 module.exports = router;
