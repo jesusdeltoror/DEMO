@@ -17,10 +17,12 @@ router.post('/',function(req,res,next){
             if(dato){
                 const passwordValido = bcrypt.compareSync(req.body.password, dato.password);
                 if(!passwordValido){
-                    return res.status(400).json({
-                        error:'ok',
-                        msj:"Ususario o Contraseña Incorrecta."
-                    })
+                    return res.render('login',{
+                                msj:{
+                                email:"El email tiene que tener la siguiente estructura *****@*****.***",
+                                password:"El password tiene que tener una longitud minima de 8 caracteres y maxima de 30, puede contener numeros y letras tanto mayusculas como minisculas"
+                                } 
+                            });  
                 }
                 const jwToken = jwt.sign({
                     data: {_id: dato._id, nombre:dato.nombre,email:dato.email,profile:dato.profile}
@@ -35,10 +37,13 @@ router.post('/',function(req,res,next){
                     jwToken
                 });
             }else{
-                res.status(400).json({
-                    error:'ok',
-                    msj:"Ususario o Contraseña Incorrecta."
-                })
+                res.render('login',{
+                    error,
+                    msj:{
+                        email:"El email tiene que tener la siguiente estructura *****@*****.***",
+                        password:"El password tiene que tener una longitud minima de 8 caracteres y maxima de 30, puede contener numeros y letras tanto mayusculas como minisculas"
+                    } 
+                });  
             }
         })
         .catch(function(err){
