@@ -1,19 +1,23 @@
-const jwt               = require('jsonwebtoken');
-const config            = require('config');
 
-let verificarToken = function(req,res,next){
-    let token = req.get('Authorization');
-    jwt.verify(token, config.get('configToken.SEED'),function(err, decoded){
-        if(err){
-            return res.status(401).json({
-                err,
-                msj:"NO tienes token"
-            });
-        }
-        //res.send(token)
-        req.usuario = decoded.usuario;
-        next();
-    })
-}
+const { client, dbName } = require('../config/conectionMongoDB');
+const passport = require('passport');
+const PassportLocal = require('passport-local').Strategy;
 
-module.exports = verificarToken
+passport.use(new PassportLocal(
+    async function (email, password, done) {
+        await client.connect();
+        //console.log('Conexion exitosa a SEC registro');
+        const db = client.db(dbName);
+        const collection = db.collection('Users');
+        collection.findOne({ email: email }, function (err, user) {
+            if (err) { return done(err); }
+            if (!user) { return done(null, false); }
+            if (!user.verifyPassword(password)) { return done(null, false); }
+            return done(null, user);
+        });
+    }
+));
+
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
+});

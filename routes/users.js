@@ -30,7 +30,7 @@ router.post('/register', function(req,res,next){
     
     resultado
     .then(function(user){
-      res.render('home',{user})
+      res.render('login',{user})
     })
     .catch(console.error)
     .finally(() => client.close());

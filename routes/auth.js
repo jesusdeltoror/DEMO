@@ -1,58 +1,51 @@
-const express           = require('express');
-const {client,dbName}   = require('../config/conectionMongoDB');
-const Joi               = require('joi');  
-const bcrypt            = require('bcrypt'); 
-const jwt               = require('jsonwebtoken');
-const config            = require('config');
-const router            = express.Router();
+const express = require('express');
+const { client, dbName } = require('../config/conectionMongoDB');
+const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const PassportLocal = require('passport-local').Strategy;
+const config = require('config');
+const router = express.Router();
 
+passport.use(new PassportLocal(
+    async function (username, password, done) {
+        await client.connect();
+        //console.log('Conexion exitosa a SEC registro');
+        const db = client.db(dbName);
+        const collection = db.collection('Users');
+        collection.findOne({ email: username ,password: password}, function (err, user) {
+            if (!user.email) {
+                return done(null, false, { message: 'Incorrect username.'});
+            }
+            if (!user.password) {
+                return done(null, false, { message: 'Incorrect password.' });
+            }
+            return done(null, user);
+        });
+    }
+));
 
-router.post('/',function(req,res,next){
-    client.connect();
-    console.log('Conexion exitosa a SEC registro');
+passport.serializeUser(function (user, done) {
+    done(null, user._id);
+});
+
+passport.deserializeUser(async function (id, done) {
+    await client.connect();
+    //console.log('Conexion exitosa a SEC registro');
     const db = client.db(dbName);
     const collection = db.collection('Users');
-    collection.findOne({email:req.body.email})
-        .then(function(dato){
-            if(dato){
-                const passwordValido = bcrypt.compareSync(req.body.password, dato.password);
-                if(!passwordValido){
-                    return res.render('login',{
-                                msj:{
-                                email:"El email tiene que tener la siguiente estructura *****@*****.***",
-                                password:"El password tiene que tener una longitud minima de 8 caracteres y maxima de 30, puede contener numeros y letras tanto mayusculas como minisculas"
-                                } 
-                            });  
-                }
-                const jwToken = jwt.sign({
-                    data: {_id: dato._id, nombre:dato.nombre,email:dato.email,profile:dato.profile}
-                }, config.get('configToken.SEED'), { expiresIn: config.get('configToken.expiration') });
-                res.json({
-                    usuario:{
-                        _id:dato._id,
-                        nombre:dato.nombre,
-                        email:dato.email,
-                        profile:dato.profile
-                    },
-                    jwToken
-                });
-            }else{
-                res.render('login',{
-                    error,
-                    msj:{
-                        email:"El email tiene que tener la siguiente estructura *****@*****.***",
-                        password:"El password tiene que tener una longitud minima de 8 caracteres y maxima de 30, puede contener numeros y letras tanto mayusculas como minisculas"
-                    } 
-                });  
-            }
-        })
-        .catch(function(err){
-            res.status(400).json({
-                error:'ok',
-                msj:"Erroro en "+err
-            })
-        })
+    collection.findOne({_id:id}, function (err, user) {
+        done(err, user);
+    });
 });
+
+
+router.post('/login', 
+    passport.authenticate('local', {
+        successRedirect: '/home',
+        failureRedirect: '/auth',
+        //failureFlash: true
+    }))
 
 
 module.exports = router;

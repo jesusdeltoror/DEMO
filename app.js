@@ -1,15 +1,20 @@
-var createError   = require('http-errors');
-var express       = require('express');
-var path          = require('path');
-var cookieParser  = require('cookie-parser');
-var logger        = require('morgan');
+const createError   = require('http-errors');
+const express       = require('express');
+const path          = require('path');
+const cookieParser  = require('cookie-parser');
+const logger        = require('morgan');
+const session       = require('express-session');
+const passport      = require('passport');
+const PassportLocal = require('passport-local').Strategy;
+const { client, dbName } = require('./config/conectionMongoDB');
+var flash = require('connect-flash');
 
-var authRouter  = require('./routes/auth');
-var usersRouter = require('./routes/users');
-var homeRouter  = require('./routes/home');
+const authRouter  = require('./routes/auth');
+const usersRouter = require('./routes/users');
+const homeRouter  = require('./routes/home');
 
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -18,8 +23,23 @@ app.set('view engine', 'hbs');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('secreto'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'secreto',
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(function(req, res, next) {
+    
+    next()
+});
 
 app.use('/auth',authRouter);
 app.use('/', usersRouter);
